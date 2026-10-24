@@ -49,6 +49,7 @@
       <div class="menu card" id="menu" role="menu" hidden>
         <button role="menuitem" id="toggle-join"></button>
         <a role="menuitem" href="/qr" target="_blank">Print guest QR code</a>
+        <button role="menuitem" id="reset-btn">Reset tables</button>
         <button role="menuitem" id="logout">Sign out</button>
       </div>
     </header>
@@ -191,6 +192,21 @@
     <div class="dialog-foot">
       <button class="btn btn-lg" data-close>Not yet</button>
       <button class="btn btn-primary btn-lg" id="clear-confirm">Table is free</button>
+    </div>
+  </dialog>
+
+  <dialog id="reset-dialog">
+    <div class="dialog-head">
+      <h3>Reset tables?</h3>
+      <button class="btn btn-ghost" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="dialog-body">
+      <p class="muted">Every table shows as open, so wait times start fresh. Tonight's stats restart from now. Guest history is kept.</p>
+      <label class="check-row"><input type="checkbox" id="reset-line"> Also clear everyone off the waitlist</label>
+    </div>
+    <div class="dialog-foot">
+      <button class="btn btn-lg" data-close>Cancel</button>
+      <button class="btn btn-primary btn-lg" id="reset-confirm">Reset</button>
     </div>
   </dialog>
 

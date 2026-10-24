@@ -587,6 +587,20 @@
     await api('/api/self-join', { open: !state.selfJoin });
     refresh();
   });
+  $('#reset-btn').addEventListener('click', () => {
+    $('#reset-line').checked = false;
+    $('#reset-dialog').showModal();
+  });
+  $('#reset-confirm').addEventListener('click', async () => {
+    try {
+      await api('/api/reset', { clearLine: $('#reset-line').checked });
+      $('#reset-dialog').close();
+      toast('Tables reset');
+      refresh();
+    } catch (err) {
+      toast(err.message);
+    }
+  });
   $('#logout').addEventListener('click', async () => {
     await api('/api/logout', {});
     showLogin();
