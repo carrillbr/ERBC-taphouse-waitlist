@@ -166,6 +166,7 @@ async function route(req, res) {
   if (m === 'GET' && p === '/') return serveFile(res, 'staff.html');
   if (m === 'GET' && p === '/join') return serveFile(res, 'join.html');
   if (m === 'GET' && p === '/qr') return serveFile(res, 'qr.html');
+  if (m === 'GET' && p === '/privacy') return serveFile(res, 'privacy.html');
   if (m === 'GET' && /^\/s\/[\w-]+$/.test(p)) return serveFile(res, 'status.html');
   if (m === 'GET' && p.startsWith('/static/')) return serveFile(res, p.slice('/static/'.length));
   if (m === 'GET' && p === '/healthz') return send(res, 200, 'ok');
