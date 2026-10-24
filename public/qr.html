@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Waitlist Sign</title>
+  <link rel="icon" href="/static/favicon.png">
+  <link rel="stylesheet" href="/static/app.css">
+  <style>
+    :root { color-scheme: light; }
+    body { background: #e9e1d2; }
+    .sign {
+      width: min(640px, calc(100vw - 32px)); margin: 32px auto; background: #f7f1e6;
+      border-top: 6px solid #c6952f; border-radius: 6px; text-align: center; padding: 0 40px 36px;
+      box-shadow: 0 10px 40px rgba(56, 72, 88, 0.18);
+    }
+    .badge { width: 168px; height: 168px; margin: 36px auto 18px; }
+    .eyebrow { color: #c6952f; }
+    h1 { font-family: 'Playfair Display', Georgia, serif; font-weight: 600; color: #384858; font-size: 46px; margin: 8px 0 0; }
+    .rule { width: 64px; height: 2px; background: #c6952f; margin: 18px auto; }
+    p.details { font-family: 'Montserrat', sans-serif; font-weight: 500; color: #333; font-size: 19px; margin: 0 auto; max-width: 30ch; }
+    #qr { margin: 26px auto 14px; padding: 14px; background: #fff; border: 2px solid #c6952f; border-radius: 10px; display: inline-block; }
+    #qr svg { width: 260px; height: 260px; display: block; }
+    .url { font-size: 13px; color: #4f6272; word-break: break-all; margin: 0; }
+    .tagline { font-family: 'Playfair Display', Georgia, serif; color: #384858; font-size: 20px; margin: 26px 0 6px; }
+    .address { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #4f6272; margin: 0; }
+    .print { display: block; margin: 0 auto 40px; }
+    @media print {
+      body { background: #fff; }
+      .print { display: none; }
+      .sign { box-shadow: none; margin: 0 auto; width: 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sign">
+    <div class="logo-badge badge"><img src="/static/logo.png" alt="Elk River Brewing Co. TapHouse"></div>
+    <p class="eyebrow">Elk River Brewing Co. TapHouse</p>
+    <h1>Waiting for a table?</h1>
+    <div class="rule"></div>
+    <p class="details">Scan to join the waitlist. We'll text you the moment your table is ready.</p>
+    <div id="qr"></div>
+    <p class="url" id="url"></p>
+    <p class="tagline">Good beer. Good food. Good people.</p>
+    <p class="address">18 S Main St, North East, MD 21901</p>
+  </div>
+  <button class="btn btn-primary btn-lg print" onclick="print()">Print this sign</button>
+
+  <script src="/static/vendor/qrcode.js"></script>
+  <script>
+    const url = `${location.origin}/join`;
+    document.getElementById('url').textContent = url.replace(/^https?:\/\//, '');
+    const qr = qrcode(0, 'M');
+    qr.addData(url);
+    qr.make();
+    document.getElementById('qr').innerHTML = qr.createSvgTag({ cellSize: 8, margin: 0, scalable: true }).replace(/fill="black"|fill="#000000"/g, 'fill="#384858"');
+  </script>
+</body>
+</html>

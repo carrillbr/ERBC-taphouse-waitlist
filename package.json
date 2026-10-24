@@ -1,0 +1,14 @@
+{
+  "name": "taphouse-waitlist",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Walk-in waitlist with text notifications for Elk River Brewing Co. TapHouse",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}

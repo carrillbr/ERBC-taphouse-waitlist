@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#384858">
+  <link rel="icon" href="/static/favicon.png">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <title>Join the Waitlist</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <link rel="stylesheet" href="/static/guest.css">
+</head>
+<body>
+  <main class="guest">
+    <header class="guest-head">
+      <div class="logo-badge guest-logo"><img src="/static/logo.png" alt="Elk River Brewing Co. TapHouse"></div>
+      <p class="eyebrow">Elk River Brewing Co. TapHouse</p>
+      <h1>Join the waitlist</h1>
+      <hr class="gold-rule">
+      <p class="lede">Add your name and we'll text you the moment your table is ready.</p>
+      <p class="wait-now" id="wait-now"></p>
+    </header>
+
+    <form id="join" class="card guest-card" novalidate>
+      <label class="field"><span>Your name</span>
+        <input type="text" name="name" autocomplete="given-name" autocapitalize="words" required maxlength="40">
+      </label>
+      <div class="field">
+        <span class="field-label">How many in your group?</span>
+        <div class="chips" id="sizes"></div>
+        <p class="muted small-note" id="big-note" hidden>Groups over 8: please see the host.</p>
+      </div>
+      <label class="field"><span>Mobile number</span>
+        <input type="tel" name="phone" autocomplete="tel" inputmode="tel" required placeholder="(555) 555-5555">
+      </label>
+      <label class="field"><span>Email <span class="muted">(optional)</span></span>
+        <input type="email" name="email" autocomplete="email" inputmode="email" placeholder="name@example.com">
+      </label>
+      <label class="consent">
+        <input type="checkbox" name="consent" required>
+        <span>Text me about my table. Message and data rates may apply. Reply STOP to opt out.</span>
+      </label>
+      <label class="consent">
+        <input type="checkbox" name="newsOptIn">
+        <span>Join the Brew Crew email list for new beers, food and events. Unsubscribe anytime.</span>
+      </label>
+      <p class="error" id="error" role="alert"></p>
+      <button class="btn btn-primary btn-lg btn-block" id="submit">Join the waitlist</button>
+    </form>
+
+    <div class="card guest-card closed" id="closed" hidden>
+      <h3>Online sign-up is paused</h3>
+      <p>Please see our host at the door and we'll get you on the list.</p>
+    </div>
+    <footer class="guest-foot">
+      <p class="tagline">Good beer. Good food. Good people.</p>
+      <p class="address">18 S Main St, North East, MD 21901 &middot; <a href="tel:+14106567097">(410) 656-7097</a></p>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const form = document.getElementById('join');
+      let size = 2;
+
+      function sizes() {
+        document.getElementById('sizes').innerHTML = [1, 2, 3, 4, 5, 6, 7, 8]
+          .map((n) => `<button type="button" class="chip" data-size="${n}" aria-pressed="${n === size}">${n}</button>`)
+          .join('');
+      }
+      sizes();
+      document.getElementById('sizes').addEventListener('click', (e) => {
+        const b = e.target.closest('[data-size]');
+        if (!b) return;
+        size = Number(b.dataset.size);
+        sizes();
+        showWait();
+      });
+
+      let info = null;
+      function showWait() {
+        if (!info) return;
+        const q = info.quotes[size <= 2 ? 2 : size <= 4 ? 4 : 6];
+        document.getElementById('wait-now').textContent =
+          q == null ? '' : q === 0 ? 'Tables are open now!' : `Current wait for ${size}: about ${q} minutes`;
+      }
+
+      fetch('/api/public').then((r) => r.json()).then((data) => {
+        info = data;
+        document.title = `Join the waitlist · ${data.venue}`;
+        if (!data.open) {
+          form.hidden = true;
+          document.getElementById('closed').hidden = false;
+        }
+        showWait();
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const err = document.getElementById('error');
+        err.textContent = '';
+        if (!form.name.value.trim()) return (err.textContent = 'Please enter your name.');
+        if (!form.phone.value.trim()) return (err.textContent = 'Please enter your mobile number.');
+        if (!form.consent.checked) return (err.textContent = 'Please check the box so we can text you.');
+        const btn = document.getElementById('submit');
+        btn.disabled = true;
+        btn.textContent = 'Adding you…';
+        try {
+          const res = await fetch('/api/join', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: form.name.value,
+              size,
+              phone: form.phone.value,
+              email: form.email.value,
+              newsOptIn: form.newsOptIn.checked,
+              consent: true,
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+          location.href = `/s/${data.token}`;
+        } catch (e) {
+          err.textContent = e.message;
+          btn.disabled = false;
+          btn.textContent = 'Join the waitlist';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

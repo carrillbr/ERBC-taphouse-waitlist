@@ -1,0 +1,136 @@
+/* Elk River Brewing Co. brand: navy, gold and cream; Playfair Display headings, Montserrat text. */
+@font-face { font-family: 'Playfair Display'; font-weight: 600; font-display: swap; src: url('/static/fonts/playfair-display-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Playfair Display'; font-weight: 700; font-display: swap; src: url('/static/fonts/playfair-display-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Montserrat'; font-weight: 400; font-display: swap; src: url('/static/fonts/montserrat-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Montserrat'; font-weight: 500; font-display: swap; src: url('/static/fonts/montserrat-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Montserrat'; font-weight: 600; font-display: swap; src: url('/static/fonts/montserrat-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Montserrat'; font-weight: 700; font-display: swap; src: url('/static/fonts/montserrat-latin-700-normal.woff2') format('woff2'); }
+
+:root {
+  --navy: #384858;
+  --slate: #4f6272;
+  --gold: #c6952f;
+  --cream: #f7f1e6;
+
+  --bg: var(--cream);
+  --surface: #fffcf6;
+  --surface-2: #efe6d4;
+  --text: #333333;
+  --heading: var(--navy);
+  --muted: #66727d;
+  --line: #e2d6bf;
+  --brand: var(--navy);
+  --brand-text: #fffcf6;
+  --accent: var(--gold);
+  --accent-text: #2a2008;
+  --accent-soft: #f4e7c9;
+  --danger: #a3412d;
+  --danger-soft: #f6e0d8;
+  --ok: #3d6f57;
+  --ok-soft: #e3eee5;
+  --shadow: 0 1px 2px rgba(56, 72, 88, 0.08), 0 4px 14px rgba(56, 72, 88, 0.06);
+  --radius: 14px;
+  --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --sans: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #1b232c;
+    --surface: #24303b;
+    --surface-2: #2e3b47;
+    --text: #f1ebdf;
+    --heading: #f7f1e6;
+    --muted: #a9b3bc;
+    --line: #3a4855;
+    --brand: #c9d6e2;
+    --brand-text: #1b232c;
+    --accent: #d9a640;
+    --accent-text: #1b232c;
+    --accent-soft: #3e3420;
+    --danger: #ec907c;
+    --danger-soft: #45292a;
+    --ok: #8cc4a6;
+    --ok-soft: #22382f;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 500 16px/1.45 var(--sans);
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3 { margin: 0; line-height: 1.2; color: var(--heading); }
+h1, h3 { font-family: var(--serif); font-weight: 600; }
+h1, h2, h3, b, .big { font-variant-numeric: lining-nums; }
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); font-weight: 700; }
+button, input, select, textarea { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+.eyebrow { font-size: 13px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--accent); font-weight: 600; }
+.gold-rule { width: 56px; height: 2px; background: var(--accent); border: 0; margin: 12px auto; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 44px; padding: 0 16px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); cursor: pointer;
+  font-weight: 600; white-space: nowrap; color: var(--text);
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--brand); color: var(--brand-text); border-color: transparent; }
+.btn-accent { background: var(--accent); color: var(--accent-text); border-color: transparent; }
+.btn-danger { color: var(--danger); }
+.btn-ghost { background: transparent; border-color: transparent; }
+.btn-lg { min-height: 56px; font-size: 17px; padding: 0 22px; border-radius: 12px; letter-spacing: 0.02em; }
+.btn-block { width: 100%; }
+
+input[type='text'], input[type='tel'], input[type='password'], input[type='email'], input[type='search'], textarea {
+  width: 100%; min-height: 50px; padding: 10px 14px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); font-size: 17px; font-weight: 500;
+}
+input:focus-visible, button:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+label.field { display: block; margin: 0 0 16px; }
+label.field > span, .field-label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.02em; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  min-width: 52px; min-height: 48px; padding: 0 14px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); font-weight: 600; cursor: pointer; font-size: 16px; color: var(--text);
+}
+.chip[aria-pressed='true'] { background: var(--brand); border-color: var(--brand); color: var(--brand-text); }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.muted { color: var(--muted); }
+.error { color: var(--danger); font-weight: 600; min-height: 1.4em; margin: 8px 0 0; }
+
+dialog {
+  border: none; border-top: 6px solid var(--accent); border-radius: 18px; padding: 0; width: min(520px, calc(100vw - 24px));
+  background: var(--surface); color: var(--text); box-shadow: 0 20px 60px rgba(20, 28, 36, 0.35);
+  max-height: calc(100dvh - 24px);
+}
+dialog::backdrop { background: rgba(27, 35, 44, 0.55); }
+.dialog-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 8px; }
+.dialog-head h3 { font-size: 22px; }
+.dialog-body { padding: 8px 20px 20px; }
+.dialog-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 0 20px 20px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  background: var(--navy); color: var(--cream); border-radius: 12px; padding: 10px 10px 10px 18px;
+  display: flex; align-items: center; gap: 14px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3); z-index: 50;
+  max-width: calc(100vw - 32px); border-left: 4px solid var(--gold);
+}
+.toast button { background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 8px; min-height: 36px; padding: 0 12px; font-weight: 700; cursor: pointer; }
+
+.logo-badge {
+  display: grid; place-items: center; border-radius: 50%; background: var(--cream);
+  border: 3px solid var(--gold); overflow: hidden; flex: none;
+}
+.logo-badge img { width: 82%; height: auto; display: block; }

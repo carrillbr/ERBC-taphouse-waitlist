@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#384858">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>TapHouse Waitlist</title>
+  <link rel="icon" href="/static/favicon.png">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <link rel="preload" href="/static/fonts/montserrat-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="stylesheet" href="/static/app.css">
+  <link rel="stylesheet" href="/static/staff.css">
+</head>
+<body>
+  <!-- Sign in -->
+  <main id="login" class="login" hidden>
+    <form id="login-form" class="card login-card">
+      <div class="logo-badge" style="width:120px;height:120px"><img src="/static/logo.png" alt="Elk River Brewing Co. TapHouse"></div>
+      <p class="eyebrow">Staff only</p>
+      <h1>TapHouse Waitlist</h1>
+      <p class="muted">Enter the staff PIN to sign in.</p>
+      <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" aria-label="Staff PIN" required>
+      <p class="error" id="login-error" role="alert"></p>
+      <button class="btn btn-primary btn-lg btn-block">Sign in</button>
+    </form>
+  </main>
+
+  <!-- Staff screen -->
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo-badge"><img src="/static/logo.png" alt=""></div>
+        <div>
+          <h1 id="venue">TapHouse Waitlist</h1>
+          <div class="muted small" id="sms-mode"></div>
+        </div>
+      </div>
+      <nav class="views" aria-label="Screens">
+        <button class="view-tab" data-view="list" aria-current="page">Waitlist</button>
+        <button class="view-tab" data-view="history">History</button>
+      </nav>
+      <div class="quotes" id="quotes" aria-label="Current quoted waits"></div>
+      <div class="top-actions">
+        <button class="btn btn-ghost" id="menu-btn" aria-haspopup="menu" aria-label="More">•••</button>
+        <button class="btn btn-primary btn-lg add-btn" id="add-btn">+ Add party</button>
+      </div>
+      <div class="menu card" id="menu" role="menu" hidden>
+        <button role="menuitem" id="toggle-join"></button>
+        <a role="menuitem" href="/qr" target="_blank">Print guest QR code</a>
+        <button role="menuitem" id="logout">Sign out</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="col-list" aria-labelledby="list-h">
+        <div class="section-head">
+          <h2 id="list-h">Waitlist <span id="count" class="count"></span></h2>
+        </div>
+        <ol id="list" class="party-list"></ol>
+        <div id="empty" class="empty card" hidden>
+          <strong>No one waiting.</strong>
+          <span class="muted">Tap “Add party” or have guests scan the QR code at the door.</span>
+        </div>
+      </section>
+
+      <aside class="col-side">
+        <section aria-labelledby="tables-h">
+          <h2 id="tables-h">Tables</h2>
+          <div id="tables" class="tables"></div>
+        </section>
+        <section aria-labelledby="stats-h">
+          <h2 id="stats-h">Tonight</h2>
+          <div id="stats" class="stats card"></div>
+        </section>
+        <section aria-labelledby="recent-h">
+          <h2 id="recent-h">Recent</h2>
+          <ul id="recent" class="recent"></ul>
+          <button class="btn btn-block see-all" data-view="history">See everyone from tonight and past nights</button>
+        </section>
+      </aside>
+    </main>
+
+    <main class="history" id="history-view" hidden>
+      <div class="history-controls">
+        <input type="search" id="h-search" placeholder="Search name, phone or email" aria-label="Search history" autocomplete="off">
+        <div class="chips" id="h-range" role="group" aria-label="When">
+          <button class="chip" data-range="tonight" aria-pressed="false">Tonight</button>
+          <button class="chip" data-range="yesterday" aria-pressed="false">Yesterday</button>
+          <button class="chip" data-range="7d" aria-pressed="true">7 days</button>
+          <button class="chip" data-range="30d" aria-pressed="false">30 days</button>
+          <button class="chip" data-range="all" aria-pressed="false">All time</button>
+        </div>
+        <div class="chips" id="h-status" role="group" aria-label="Outcome">
+          <button class="chip" data-status="" aria-pressed="true">Everyone</button>
+          <button class="chip" data-status="seated" aria-pressed="false">Seated</button>
+          <button class="chip" data-status="cancelled" aria-pressed="false">Removed</button>
+          <button class="chip" data-status="noshow" aria-pressed="false">No-shows</button>
+        </div>
+      </div>
+      <div class="history-bar">
+        <span id="h-count" class="muted"></span>
+        <span class="history-exports">
+          <a class="btn" id="h-export">Download these visits (CSV)</a>
+          <a class="btn" href="/api/export/guests.csv">Download guest list (CSV)</a>
+        </span>
+      </div>
+      <ul id="h-list" class="h-list"></ul>
+      <button class="btn btn-block" id="h-more" hidden>Show more</button>
+    </main>
+  </div>
+
+  <!-- Add / edit party -->
+  <dialog id="party-dialog">
+    <form id="party-form" method="dialog">
+      <div class="dialog-head">
+        <h3 id="party-title">Add party</h3>
+        <button class="btn btn-ghost" value="cancel" formnovalidate aria-label="Close">✕</button>
+      </div>
+      <div class="dialog-body">
+        <label class="field"><span>Name</span>
+          <input type="text" name="name" autocomplete="off" autocapitalize="words" required maxlength="40">
+        </label>
+        <div class="field">
+          <span class="field-label">Party size</span>
+          <div class="chips" id="size-chips"></div>
+        </div>
+        <label class="field"><span>Mobile number <span class="muted">(for the “table ready” text)</span></span>
+          <input type="tel" name="phone" autocomplete="off" inputmode="tel" placeholder="(555) 555-5555">
+          <span class="returning" id="returning" hidden></span>
+        </label>
+        <label class="field"><span>Email <span class="muted">(optional)</span></span>
+          <input type="email" name="email" autocomplete="off" inputmode="email" placeholder="name@example.com">
+        </label>
+        <label class="check-row">
+          <input type="checkbox" name="newsOptIn">
+          <span>Guest said OK to emails about news and events</span>
+        </label>
+        <div class="field">
+          <span class="field-label">Notes</span>
+          <div class="chips" id="note-chips"></div>
+          <input type="text" name="notes" placeholder="Anything else" maxlength="80" style="margin-top:8px">
+        </div>
+        <p class="quote-line" id="party-quote"></p>
+        <p class="error" id="party-error" role="alert"></p>
+      </div>
+      <div class="dialog-foot">
+        <button class="btn btn-primary btn-lg btn-block" id="party-submit" value="default">Add to waitlist</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Seat party / pick party for table -->
+  <dialog id="seat-dialog">
+    <div class="dialog-head">
+      <h3 id="seat-title">Seat party</h3>
+      <button class="btn btn-ghost" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="dialog-body">
+      <p class="muted" id="seat-hint"></p>
+      <div id="seat-options" class="seat-options"></div>
+      <p class="error" id="seat-error" role="alert"></p>
+    </div>
+    <div class="dialog-foot" id="seat-foot" hidden>
+      <button class="btn btn-primary btn-lg btn-block" id="seat-confirm">Seat at selected tables</button>
+    </div>
+  </dialog>
+
+  <!-- Party actions -->
+  <dialog id="more-dialog">
+    <div class="dialog-head">
+      <h3 id="more-title">Party</h3>
+      <button class="btn btn-ghost" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="dialog-body more-actions">
+      <div id="more-info" class="muted"></div>
+      <button class="btn btn-lg btn-block" id="more-edit">Edit details</button>
+      <button class="btn btn-lg btn-block" id="more-noshow">Mark no-show</button>
+      <button class="btn btn-lg btn-block btn-danger" id="more-remove">Remove from list</button>
+    </div>
+  </dialog>
+
+  <!-- Clear table -->
+  <dialog id="clear-dialog">
+    <div class="dialog-head">
+      <h3 id="clear-title">Clear table?</h3>
+      <button class="btn btn-ghost" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="dialog-body"><p id="clear-info" class="muted"></p></div>
+    <div class="dialog-foot">
+      <button class="btn btn-lg" data-close>Not yet</button>
+      <button class="btn btn-primary btn-lg" id="clear-confirm">Table is free</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden><span id="toast-text"></span><button id="toast-undo" hidden>Undo</button></div>
+
+  <script src="/static/staff.js"></script>
+</body>
+</html>

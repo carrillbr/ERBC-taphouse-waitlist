@@ -1,0 +1,28 @@
+# One-click setup on Render (render.com): New > Blueprint, then pick this repository.
+# Uses Render's default paid instance (about $7/month) plus a 1 GB disk for the database.
+services:
+  - type: web
+    name: taphouse-waitlist
+    runtime: docker
+    healthCheckPath: /healthz
+    disk:
+      name: waitlist-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: STAFF_PIN
+        sync: false
+      - key: BASE_URL
+        sync: false
+      - key: VENUE_NAME
+        value: Elk River Brewing Co. TapHouse
+      - key: TIMEZONE
+        value: America/New_York
+      - key: TABLES
+        value: 20:4,21:4,22:4,23:4,10:2,11:2
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM
+        sync: false

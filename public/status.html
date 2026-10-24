@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#384858">
+  <link rel="icon" href="/static/favicon.png">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <title>Your Spot in Line</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <link rel="stylesheet" href="/static/guest.css">
+</head>
+<body>
+  <main class="guest">
+    <header class="guest-head">
+      <div class="logo-badge guest-logo small"><img src="/static/logo.png" alt="Elk River Brewing Co. TapHouse"></div>
+      <p class="eyebrow">Elk River Brewing Co. TapHouse</p>
+    </header>
+
+    <section class="card guest-card status" id="status" aria-live="polite">
+      <p class="muted">Loading your spot…</p>
+    </section>
+
+    <p class="tip muted" id="tip" hidden>Grab a pint at the bar or take a stroll down Main Street. Keep this page open, and we'll text you the moment your table is ready.</p>
+    <button class="btn btn-block btn-danger leave" id="leave" hidden>Leave the waitlist</button>
+    <footer class="guest-foot">
+      <p class="tagline">Good beer. Good food. Good people.</p>
+      <p class="address">18 S Main St, North East, MD 21901 &middot; <a href="tel:+14106567097">(410) 656-7097</a></p>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const token = location.pathname.split('/').pop();
+      const box = document.getElementById('status');
+      const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+      const ordinal = (n) => n + (['th', 'st', 'nd', 'rd'][(n % 100 > 10 && n % 100 < 14) ? 0 : n % 10] || 'th');
+      let lastStatus = null;
+
+      async function load() {
+        const res = await fetch(`/api/guest/${token}`);
+        if (!res.ok) {
+          box.innerHTML = '<h2>We couldn’t find that spot</h2><p>Please check with the host at the door.</p>';
+          return;
+        }
+        const s = await res.json();
+        const active = s.status === 'waiting' || s.status === 'notified';
+        document.getElementById('leave').hidden = !active;
+        document.getElementById('tip').hidden = s.status !== 'waiting';
+
+        if (s.status === 'waiting') {
+          box.className = 'card guest-card status';
+          box.innerHTML = `
+            <p class="eyebrow">${esc(s.name)} &middot; party of ${s.size}</p>
+            <p class="big">You're ${ordinal(s.position)} in line</p>
+            <hr class="gold-rule">
+            <p class="est">${s.estimate == null ? '' : s.estimate === 0 ? 'Your table should be ready any minute.' : `About <b>${s.estimate} minutes</b> to go`}</p>`;
+        } else if (s.status === 'notified') {
+          box.className = 'card guest-card status ready';
+          box.innerHTML = `
+            <p class="eyebrow">${esc(s.name)} &middot; party of ${s.size}</p>
+            <p class="big">Your table is ready!</p>
+            <hr class="gold-rule">
+            <p>Please check in with our host within ${s.noShowMinutes} minutes.</p>`;
+          if (lastStatus && lastStatus !== 'notified' && navigator.vibrate) navigator.vibrate([300, 100, 300]);
+        } else if (s.status === 'seated') {
+          box.className = 'card guest-card status';
+          box.innerHTML = `<p class="big">Enjoy, ${esc(s.name)}!</p><hr class="gold-rule"><p class="muted">You're all set. Cheers from all of us at the TapHouse.</p>`;
+        } else {
+          box.className = 'card guest-card status';
+          box.innerHTML = `<p class="big">You're off the list</p><hr class="gold-rule"><p class="muted">We hope to see you again soon. Changed your mind? <a href="/join">Join again</a>.</p>`;
+        }
+        lastStatus = s.status;
+      }
+
+      document.getElementById('leave').addEventListener('click', async () => {
+        if (!confirm('Leave the waitlist? You’ll lose your spot.')) return;
+        await fetch(`/api/guest/${token}/cancel`, { method: 'POST' });
+        load();
+      });
+
+      load();
+      const stream = new EventSource('/api/guest-stream');
+      stream.addEventListener('change', load);
+      setInterval(load, 60000);
+      document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && load());
+    })();
+  </script>
+</body>
+</html>

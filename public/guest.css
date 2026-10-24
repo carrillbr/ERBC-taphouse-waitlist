@@ -1,0 +1,28 @@
+.guest { max-width: 480px; margin: 0 auto; padding: 28px 16px 32px; }
+.guest-head { text-align: center; display: grid; justify-items: center; gap: 6px; margin-bottom: 20px; }
+.guest-head h1 { font-size: 34px; }
+.guest-head p { margin: 0; }
+.guest-head .gold-rule { margin: 6px auto 4px; }
+.guest-logo { width: 132px; height: 132px; margin-bottom: 8px; box-shadow: var(--shadow); }
+.guest-logo.small { width: 104px; height: 104px; }
+.lede { color: var(--muted); max-width: 32ch; }
+.wait-now { font-weight: 700; color: var(--heading); min-height: 1.4em; margin-top: 4px !important; }
+.guest-card { padding: 22px 20px; border-top: 6px solid var(--accent); }
+.consent { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; color: var(--muted); margin: 4px 0 12px; }
+.consent input { width: 24px; height: 24px; flex: none; margin: 0; accent-color: var(--navy); }
+.small-note { font-size: 14px; margin: 8px 0 0; }
+.status { text-align: center; padding: 32px 20px; }
+.status p { margin: 6px 0; }
+.status .big { font-family: var(--serif); font-weight: 600; font-size: 34px; line-height: 1.15; color: var(--heading); }
+.status .est { font-size: 18px; }
+.status .est b { color: var(--heading); }
+.status.ready { background: var(--accent-soft); }
+.tip { text-align: center; margin: 18px 8px; }
+.leave { margin-top: 12px; }
+.closed { text-align: center; }
+.closed h3 { font-size: 22px; margin-bottom: 8px; }
+.guest-foot { text-align: center; margin-top: 32px; padding-top: 18px; border-top: 1px solid var(--line); }
+.guest-foot p { margin: 4px 0; }
+.tagline { font-family: var(--serif); font-size: 17px; color: var(--heading); }
+.address { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.address a { color: inherit; }
