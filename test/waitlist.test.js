@@ -162,3 +162,33 @@ test('email capture, history search, returning guests and CSV', async () => {
   assert.equal(guests.length, 2); // header + one guest, both visits merged
   assert.match(guests[1], /^Dana,\(763\) 555-0110,dana@example\.com,Yes,2,/);
 });
+
+test('reset tables: manual reset and nightly rollover', async () => {
+  const { wl } = makeWaitlist();
+  const a = await wl.addParty({ name: 'Sam', size: 4 });
+  const b = await wl.addParty({ name: 'Lee', size: 2 });
+  await wl.addParty({ name: 'Kim', size: 2 });
+  wl.seat(a.id, ['t1']);
+  wl.seat(b.id, ['t5']);
+
+  wl.resetFloor();
+  let s = wl.staffState();
+  assert.ok(s.tables.every((t) => !t.party));
+  assert.equal(s.waiting.length, 1); // the line is kept unless asked
+  assert.equal(s.stats.parties, 0); // stats start over
+
+  wl.resetFloor({ clearLine: true });
+  assert.equal(wl.staffState().waiting.length, 0);
+  assert.equal(wl.history({ range: 'all' }).total, 3); // history is kept
+
+  // Nightly: last night's seated table and leftover line are cleared once.
+  const c = await wl.addParty({ name: 'Ray', size: 4 });
+  wl.seat(c.id, ['t2']);
+  await wl.addParty({ name: 'Ann', size: 2 });
+  const tomorrow = Date.now() + 86400000;
+  assert.equal(wl.dailyReset(tomorrow), true);
+  s = wl.staffState(tomorrow);
+  assert.ok(s.tables.every((t) => !t.party));
+  assert.equal(s.waiting.length, 0);
+  assert.equal(wl.dailyReset(tomorrow + 60000), false);
+});
