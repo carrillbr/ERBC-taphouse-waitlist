@@ -50,6 +50,10 @@ const waitlist = new Waitlist(db, {
   onChange: broadcast,
 });
 
+// Open the tables and clear out last night's line at the 4am rollover.
+waitlist.dailyReset();
+setInterval(() => waitlist.dailyReset(), 60000).unref();
+
 // ---- helpers ---------------------------------------------------------------
 
 const staffToken = () => crypto.createHmac('sha256', secret).update(`staff:${STAFF_PIN}`).digest('base64url');
@@ -252,6 +256,11 @@ async function route(req, res) {
         'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': `attachment; filename="${visits ? 'waitlist-visits' : 'waitlist-guests'}-${stamp}.csv"`,
       });
+    }
+    if (m === 'POST' && p === '/api/reset') {
+      const body = await readBody(req);
+      waitlist.resetFloor({ clearLine: Boolean(body.clearLine) });
+      return send(res, 200, { ok: true });
     }
     if (m === 'POST' && p === '/api/self-join') {
       const body = await readBody(req);
