@@ -26,3 +26,4 @@
 .tagline { font-family: var(--serif); font-size: 17px; color: var(--heading); }
 .address { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .address a { color: inherit; }
+.consent a, .policy a { color: var(--brand); font-weight: 600; }
