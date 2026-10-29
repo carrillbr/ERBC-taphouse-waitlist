@@ -44,6 +44,7 @@
       <div class="quotes" id="quotes" aria-label="Current quoted waits"></div>
       <div class="top-actions">
         <button class="btn btn-ghost" id="menu-btn" aria-haspopup="menu" aria-label="More">•••</button>
+        <button class="btn btn-lg walkin-btn" id="walkin-btn">Walk-in</button>
         <button class="btn btn-primary btn-lg add-btn" id="add-btn">+ Add party</button>
       </div>
       <div class="menu card" id="menu" role="menu" hidden>
@@ -159,8 +160,16 @@
       <button class="btn btn-ghost" data-close aria-label="Close">✕</button>
     </div>
     <div class="dialog-body">
+      <div class="field" id="walkin-size" hidden>
+        <span class="field-label">How many?</span>
+        <div class="chips" id="walkin-chips"></div>
+      </div>
       <p class="muted" id="seat-hint"></p>
       <div id="seat-options" class="seat-options"></div>
+      <div class="walkin-quick" id="walkin-quick" hidden>
+        <span class="field-label">Or seat a walk-in here now</span>
+        <div class="chips" id="walkin-quick-chips"></div>
+      </div>
       <p class="error" id="seat-error" role="alert"></p>
     </div>
     <div class="dialog-foot" id="seat-foot" hidden>
