@@ -241,6 +241,10 @@ async function route(req, res) {
       const party = await waitlist.addParty({ ...body, source: 'staff' });
       return send(res, 200, { id: party.id });
     }
+    if (m === 'POST' && p === '/api/walkins') {
+      const body = await readBody(req);
+      return send(res, 200, { id: waitlist.seatWalkIn(body).id });
+    }
     if (m === 'GET' && p === '/api/history') {
       const q = Object.fromEntries(url.searchParams);
       return send(res, 200, waitlist.history(q));
