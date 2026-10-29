@@ -167,7 +167,7 @@
           (p) => `<li>
             <span><b>${esc(p.name)}</b> (${p.size}) · ${label[p.status]}${p.status === 'seated' && p.tableIds ? ` at ${esc(tableName(p.tableIds))}` : ''}
             <span class="muted">· ${dur(mins(p.endedAt))} ago</span></span>
-            <button class="btn" data-restore="${p.id}">Put back</button>
+            <button class="btn" data-restore="${p.id}">${p.source === 'walkin' ? 'Undo' : 'Put back'}</button>
           </li>`
         )
         .join('') || '<li class="muted">Nothing yet tonight.</li>';
@@ -291,7 +291,14 @@
     seatingParty = p;
     picked = new Set();
     const multi = p.size > 4;
-    $('#seat-title').textContent = `Seat ${p.name} (${p.size})`;
+    $('#seat-title').textContent = p.walkIn ? 'Seat a walk-in' : `Seat ${p.name} (${p.size})`;
+    $('#walkin-size').hidden = !p.walkIn;
+    $('#walkin-quick').hidden = true;
+    if (p.walkIn) {
+      $('#walkin-chips').innerHTML = Array.from({ length: MAX_PARTY }, (_, i) => i + 1)
+        .map((n) => `<button type="button" class="chip" data-walkin-size="${n}" aria-pressed="${n === p.size}">${n}</button>`)
+        .join('');
+    }
     $('#seat-error').textContent = '';
     $('#seat-foot').hidden = !multi;
     const options = seatChoices(p.size);
@@ -322,8 +329,14 @@
     $('#seat-title').textContent = `Who's sitting at ${t.label}?`;
     $('#seat-error').textContent = '';
     $('#seat-foot').hidden = true;
+    $('#walkin-size').hidden = true;
     const fit = state.waiting.filter((p) => p.size <= t.seats);
-    $('#seat-hint').textContent = fit.length ? 'In line order. Tap a party to seat them.' : `No one waiting fits a ${t.seats}-top. Walk-ins can sit here.`;
+    $('#seat-hint').textContent = fit.length ? 'In line order. Tap a party to seat them.' : `No one waiting fits a ${t.seats}-top.`;
+    // Walk-ins: tap how many and they're seated. No name or phone needed.
+    $('#walkin-quick').hidden = false;
+    $('#walkin-quick-chips').innerHTML = Array.from({ length: t.seats }, (_, i) => i + 1)
+      .map((n) => `<button type="button" class="chip" data-quick-size="${n}" data-table="${t.id}">${n}</button>`)
+      .join('');
     $('#seat-options').className = 'seat-options people';
     $('#seat-options').innerHTML = fit
       .map(
@@ -342,10 +355,12 @@
 
   async function seat(party, tableIds) {
     try {
-      await api(`/api/parties/${party.id}/seat`, { tableIds });
+      let id = party.id;
+      if (party.walkIn) ({ id } = await api('/api/walkins', { size: party.size, tableIds }));
+      else await api(`/api/parties/${party.id}/seat`, { tableIds });
       $('#seat-dialog').close();
       const names = tableIds.map((id) => state.tables.find((t) => t.id === id).label).join(' + ');
-      toast(`Seated ${party.name} at ${names}`, party.id);
+      toast(`Seated ${party.walkIn ? `walk-in (${party.size})` : party.name} at ${names}`, id);
       refresh();
     } catch (err) {
       $('#seat-error').textContent = err.message;
@@ -367,6 +382,17 @@
     updateSeatConfirm();
   });
   $('#seat-confirm').addEventListener('click', () => seat(seatingParty, [...picked]));
+
+  const walkIn = (size) => ({ walkIn: true, name: 'Walk-in', size });
+  $('#walkin-btn').addEventListener('click', () => openSeat(walkIn(2)));
+  $('#walkin-chips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-walkin-size]');
+    if (b) openSeat(walkIn(Number(b.dataset.walkinSize)));
+  });
+  $('#walkin-quick-chips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-quick-size]');
+    if (b) seat(walkIn(Number(b.dataset.quickSize)), [b.dataset.table]);
+  });
 
   // ---- party list actions --------------------------------------------------
 
@@ -505,13 +531,14 @@
         const waited = end ? `waited ${dur(Math.round((end - p.createdAt) / 60000))}` : `waiting ${dur(mins(p.createdAt))}`;
         const active = p.status === 'waiting' || p.status === 'notified';
         let action = '';
-        if (!active && p.tonight) action = `<button class="btn" data-h-restore="${p.id}">Put back in line</button>`;
+        if (p.source === 'walkin') action = '';
+        else if (!active && p.tonight) action = `<button class="btn" data-h-restore="${p.id}">Put back in line</button>`;
         else if (!active) action = `<button class="btn" data-h-again="${p.id}">Add again</button>`;
         return `<li class="card h-row">
           <div class="h-when"><b>${esc(day)}</b>${esc(time)}</div>
           <div class="h-name">${esc(p.name)} <small>party of ${p.size}${p.visits > 1 ? ` · ${p.visits} visits` : ''}${p.source === 'guest' ? ' · QR' : ''}</small></div>
           <div class="h-contact">
-            ${p.phone ? `<span><a href="tel:${esc(p.phone)}">${esc(fmtPhone(p.phone))}</a></span>` : '<span class="muted">No phone</span>'}
+            ${p.phone ? `<span><a href="tel:${esc(p.phone)}">${esc(fmtPhone(p.phone))}</a></span>` : p.source === 'walkin' ? '' : '<span class="muted">No phone</span>'}
             ${p.email ? `<span><a href="mailto:${esc(p.email)}">${esc(p.email)}</a>${p.newsOptIn ? ' <span class="tag web">emails OK</span>' : ''}</span>` : ''}
           </div>
           <div class="h-outcome out-${p.status}">${label[p.status]}${p.status === 'seated' && p.tableIds ? ` · ${esc(tableName(p.tableIds))}` : ''}<small>${waited}</small></div>
